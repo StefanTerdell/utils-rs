@@ -3,3 +3,4 @@
 pub mod option;
 pub mod path;
 pub mod prefix;
+pub mod secret;
