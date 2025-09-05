@@ -28,6 +28,12 @@ impl<T> Secret<T> {
     }
 }
 
+impl<T> From<T> for Secret<T> {
+    fn from(value: T) -> Self {
+        Self::new(value)
+    }
+}
+
 impl<T> std::fmt::Debug for Secret<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("Secret<{}>", std::any::type_name::<T>()))
