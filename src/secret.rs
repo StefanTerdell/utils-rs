@@ -32,6 +32,12 @@ impl<T> Secret<T> {
     }
 }
 
+impl<T: Clone> Secret<T> {
+    pub fn expose_clone(&self) -> T {
+        self.0.clone()
+    }
+}
+
 impl<T> From<T> for Secret<T> {
     fn from(value: T) -> Self {
         Self::new(value)
