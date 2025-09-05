@@ -26,6 +26,10 @@ impl<T> Secret<T> {
     pub fn expose(self) -> T {
         self.0
     }
+
+    pub fn expose_ref(&self) -> &T {
+        &self.0
+    }
 }
 
 impl<T> From<T> for Secret<T> {
