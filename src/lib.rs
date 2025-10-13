@@ -1,5 +1,8 @@
 //! A collection of useful Rust utility functions, types, and traits.
 
+pub mod as_clone;
+pub mod as_copy;
+pub mod bool;
 pub mod option;
 pub mod path;
 pub mod prelude;
