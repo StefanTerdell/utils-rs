@@ -1,14 +1,6 @@
-use std::fmt::Display;
+use crate::map::Map;
 
-pub trait MapBool: Sized {
-    fn ok(self) -> Result<Self, Self>;
-    fn ok_or<E>(self, err: E) -> Result<Self, E>;
-    fn map<T>(self, f: impl FnOnce() -> T) -> Option<T>;
-    fn unwrap(self) -> Self;
-    fn expect(self, message: impl Display) -> Self;
-}
-
-impl MapBool for bool {
+impl Map for bool {
     fn ok(self) -> Result<Self, Self> {
         if self { Ok(true) } else { Err(false) }
     }
@@ -25,7 +17,7 @@ impl MapBool for bool {
         self.expect("Expected 'true', got 'false'")
     }
 
-    fn expect(self, message: impl Display) -> Self {
+    fn expect(self, message: impl std::fmt::Display) -> Self {
         if self { self } else { panic!("{message}") }
     }
 }
