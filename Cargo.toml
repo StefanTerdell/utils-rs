@@ -1,9 +1,10 @@
 [package]
 name = "utils-rs"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2024"
 
 [dependencies]
+schemars = { version = "1.0.4", optional = true }
 serde = { version = "1.0.219", features = ["derive"], optional = true }
 serde_json = { version = "1.0.143", optional = true }
 serde_yml = { version = "0.0.12", optional = true }
@@ -11,4 +12,6 @@ thiserror = "2.0.16"
 toml = { version = "0.9.5", optional = true }
 
 [features]
+default = ["serde", "schemars"]
 serde = ["dep:serde", "dep:serde_yml", "dep:toml", "dep:serde_json"]
+schemars = ["dep:schemars", "dep:serde"]

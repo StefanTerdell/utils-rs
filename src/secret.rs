@@ -72,6 +72,27 @@ impl<'de, T: serde::Deserialize<'de>> serde::Deserialize<'de> for Secret<T> {
     }
 }
 
+// Schemars impls:
+
+#[cfg(feature = "schemars")]
+impl<T: schemars::JsonSchema> schemars::JsonSchema for Secret<T> {
+    fn schema_id() -> std::borrow::Cow<'static, str> {
+        T::schema_id()
+    }
+
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        T::schema_name()
+    }
+
+    fn inline_schema() -> bool {
+        T::inline_schema()
+    }
+
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        T::json_schema(generator)
+    }
+}
+
 // std impls:
 
 impl<T: Clone> Clone for Secret<T> {
