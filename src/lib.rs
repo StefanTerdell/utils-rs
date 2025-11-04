@@ -14,5 +14,8 @@ pub mod str;
 pub mod path;
 pub mod prelude;
 pub mod secret;
-#[cfg(feature = "serde")]
-pub mod serde_format;
+
+#[cfg(feature = "serde_formats")]
+pub mod serde_formats;
+
+pub mod dependencies;

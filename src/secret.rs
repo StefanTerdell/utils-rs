@@ -11,10 +11,9 @@
 /// - `Eq`
 /// - `PartialOrd`
 /// - `Ord`
-///
-/// And, if feature `"serde"` is active:
-/// - `serde::Serialize`
-/// - `serde::Deserialize`
+/// - `serde::Serialize` (if feature `"serde"` is active)
+/// - `serde::Deserialize` (if feature `"serde"` is active)
+/// - `schemars::JsonSchema` (if feature `"schemars"` is active)
 ///
 pub struct Secret<T>(T);
 
