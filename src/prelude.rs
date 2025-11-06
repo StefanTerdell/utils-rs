@@ -13,6 +13,7 @@ pub use crate::{
     map::*,
     path::{find_walking_back::*, resolve_env_parts::*},
     secret::*,
+    unwrap_into::*,
     with_len::*,
 };
 

@@ -9,6 +9,7 @@ pub mod expect_comparison;
 pub mod expect_length;
 pub mod from_str;
 pub mod map;
+pub mod unwrap_into;
 pub mod with_len;
 
 // Trait implementations:
