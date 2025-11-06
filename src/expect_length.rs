@@ -1,9 +1,25 @@
-use crate::{
-    comparator::{Comparison, ExpectedComparisonError},
-    with_len::WithLen,
-};
+use crate::{comparator::Comparison, prelude::ExpectedComparisonError, with_len::WithLen};
 use core::error::Error;
 use std::fmt::Display;
+
+pub trait ExpectLen: WithLen + Sized {
+    fn expect_len_lt(self, length: usize) -> Result<Self, ExpectedLenError>;
+    fn expect_len_lte(self, length: usize) -> Result<Self, ExpectedLenError>;
+    fn expect_len_eq(self, length: usize) -> Result<Self, ExpectedLenError>;
+    fn expect_len_ne(self, length: usize) -> Result<Self, ExpectedLenError>;
+    fn expect_len_gte(self, length: usize) -> Result<Self, ExpectedLenError>;
+    fn expect_len_gt(self, length: usize) -> Result<Self, ExpectedLenError>;
+
+    fn expect_non_empty(self) -> Result<Self, ExpectedLenError> {
+        self.expect_len_gt(0)
+    }
+    fn expect_empty(self) -> Result<Self, ExpectedLenError> {
+        self.expect_len_ne(0)
+    }
+    fn expect_len(self, length: usize) -> Result<Self, ExpectedLenError> {
+        self.expect_len_eq(length)
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
@@ -41,47 +57,40 @@ impl Display for ExpectedLenError {
     }
 }
 
-pub trait ExpectLen: WithLen + Sized {
-    fn expect_len_lt(self, length: usize) -> Result<Self, ExpectedLenError>;
-    fn expect_len_lte(self, length: usize) -> Result<Self, ExpectedLenError>;
-    fn expect_len_eq(self, length: usize) -> Result<Self, ExpectedLenError>;
-    fn expect_len_gte(self, length: usize) -> Result<Self, ExpectedLenError>;
-    fn expect_len_gt(self, length: usize) -> Result<Self, ExpectedLenError>;
+impl Comparison {
+    pub fn expect_len_comparison<T: WithLen + Sized>(
+        self,
+        with_len: T,
+        length_comparator: usize,
+    ) -> Result<T, ExpectedLenError> {
+        self.expect_comparison(with_len.len(), length_comparator)
+            .map_err(ExpectedLenError::from)
+            .map(|_| with_len)
+    }
 }
 
 impl<T: WithLen + Sized> ExpectLen for T {
     fn expect_len_lt(self, length: usize) -> Result<Self, ExpectedLenError> {
-        Comparison::Less
-            .expect_comparison(self.len(), length)
-            .map_err(ExpectedLenError::from)
-            .map(|_| self)
+        Comparison::Less.expect_len_comparison(self, length)
     }
 
     fn expect_len_lte(self, length: usize) -> Result<Self, ExpectedLenError> {
-        Comparison::LessOrEqual
-            .expect_comparison(self.len(), length)
-            .map_err(ExpectedLenError::from)
-            .map(|_| self)
+        Comparison::LessOrEqual.expect_len_comparison(self, length)
     }
 
     fn expect_len_eq(self, length: usize) -> Result<Self, ExpectedLenError> {
-        Comparison::Equal
-            .expect_comparison(self.len(), length)
-            .map_err(ExpectedLenError::from)
-            .map(|_| self)
+        Comparison::Equal.expect_len_comparison(self, length)
+    }
+
+    fn expect_len_ne(self, length: usize) -> Result<Self, ExpectedLenError> {
+        Comparison::Unequal.expect_len_comparison(self, length)
     }
 
     fn expect_len_gte(self, length: usize) -> Result<Self, ExpectedLenError> {
-        Comparison::GreaterOrEqual
-            .expect_comparison(self.len(), length)
-            .map_err(ExpectedLenError::from)
-            .map(|_| self)
+        Comparison::GreaterOrEqual.expect_len_comparison(self, length)
     }
 
     fn expect_len_gt(self, length: usize) -> Result<Self, ExpectedLenError> {
-        Comparison::Greater
-            .expect_comparison(self.len(), length)
-            .map_err(ExpectedLenError::from)
-            .map(|_| self)
+        Comparison::Greater.expect_len_comparison(self, length)
     }
 }
