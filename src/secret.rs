@@ -15,6 +15,8 @@
 /// - `serde::Deserialize` (if feature `"serde"` is active)
 /// - `schemars::JsonSchema` (if feature `"schemars"` is active)
 ///
+#[cfg_attr(feature = "sqlx", derive(::sqlx::Type))]
+#[cfg_attr(feature = "sqlx", sqlx(transparent))]
 pub struct Secret<T>(T);
 
 impl<T> Secret<T> {

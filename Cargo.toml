@@ -8,11 +8,13 @@ schemars = { version = "1.0.4", optional = true }
 serde = { version = "1.0.219", features = ["derive"], optional = true }
 serde_json = { version = "1.0.143", optional = true }
 serde_yml = { version = "0.0.12", optional = true }
+sqlx = { version = "0.8.6", default-features = false, features = ["derive"], optional = true }
 thiserror = "2.0.16"
 toml = { version = "0.9.5", optional = true }
 
 [features]
-default = ["serde", "serde_formats", "schemars"]
+default = ["serde", "serde_formats", "schemars", "sqlx"]
 serde = ["dep:serde"]
 schemars = ["serde", "dep:schemars"]
 serde_formats = ["serde", "dep:serde_yml", "dep:toml", "dep:serde_json"]
+sqlx = ["dep:sqlx"]
