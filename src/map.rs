@@ -4,6 +4,7 @@ pub trait Map: Sized {
     fn ok(self) -> Result<Self, Self>;
     fn ok_or<E>(self, err: E) -> Result<Self, E>;
     fn map<T>(self, f: impl FnOnce() -> T) -> Option<T>;
+    fn and_then<T>(self, f: impl FnOnce() -> Option<T>) -> Option<T>;
     fn unwrap(self) -> Self;
     fn expect(self, message: impl std::fmt::Display) -> Self;
 }

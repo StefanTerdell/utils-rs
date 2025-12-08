@@ -13,6 +13,10 @@ impl Map for bool {
         if self { Some(f()) } else { None }
     }
 
+    fn and_then<T>(self, f: impl FnOnce() -> Option<T>) -> Option<T> {
+        if self { f() } else { None }
+    }
+
     fn unwrap(self) -> Self {
         self.expect("Expected 'true', got 'false'")
     }
