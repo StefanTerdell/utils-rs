@@ -1,18 +1,7 @@
-use std::{
-    env::current_dir,
-    fs::exists,
-    path::{Path, PathBuf},
-};
+use crate::find_upwards::FindUpwards;
 
-pub trait FindWalkingBack {
-    /// Finds an existing file or directory by walking backwards from its expected path.
-    /// If the provided path does not contain a parent the current dir is used as the starting point.
-    /// Always returns Ok(None) if the provided path is empty.
-    fn find_walking_back(&self) -> Result<Option<PathBuf>, std::io::Error>;
-}
-
-impl FindWalkingBack for Path {
-    fn find_walking_back(&self) -> Result<Option<PathBuf>, std::io::Error> {
+impl FindUpwards for std::path::Path {
+    fn find_upwards(&self) -> Result<Option<std::path::PathBuf>, std::io::Error> {
         let Some(file_or_dir_name) = self.file_name() else {
             return Ok(None);
         };
@@ -21,18 +10,18 @@ impl FindWalkingBack for Path {
             && !parent_dir.as_os_str().is_empty()
         {
             if parent_dir.is_relative() {
-                &current_dir()?.join(parent_dir)
+                &std::env::current_dir()?.join(parent_dir)
             } else {
                 parent_dir
             }
         } else {
-            &current_dir()?
+            &std::env::current_dir()?
         };
 
         let mut curr_path = curr_dir.join(file_or_dir_name);
 
         loop {
-            if exists(&curr_path)? {
+            if std::fs::exists(&curr_path)? {
                 return Ok(Some(curr_path));
             } else if let Some(parent) = curr_dir.parent() {
                 curr_dir = parent;
@@ -44,9 +33,9 @@ impl FindWalkingBack for Path {
     }
 }
 
-impl<T: AsRef<Path>> FindWalkingBack for T {
-    fn find_walking_back(&self) -> Result<Option<PathBuf>, std::io::Error> {
-        self.as_ref().find_walking_back()
+impl<T: AsRef<std::path::Path>> FindUpwards for T {
+    fn find_upwards(&self) -> Result<Option<std::path::PathBuf>, std::io::Error> {
+        self.as_ref().find_upwards()
     }
 }
 
@@ -66,7 +55,7 @@ mod tests {
 
         File::create_new(&file_path).expect("Could not create file to find");
 
-        let result_from_file_name_only = (file_name).find_walking_back();
+        let result_from_file_name_only = (file_name).find_upwards();
 
         remove_file(&file_path).expect("Could not remove temp file");
 
@@ -84,7 +73,7 @@ mod tests {
         File::create_new(&file_path).expect("Could not create file to find");
 
         let result_from_absolue_path =
-            (current_dir().expect("No current dir").join(file_name)).find_walking_back();
+            (current_dir().expect("No current dir").join(file_name)).find_upwards();
 
         remove_file(&file_path).expect("Could not remove temp file");
 
@@ -99,7 +88,7 @@ mod tests {
         File::create_new(&file_path).expect("Could not create file to find");
 
         let result_from_absolue_path =
-            (PathBuf::from("target").join(file_name)).find_walking_back();
+            (std::path::PathBuf::from("target").join(file_name)).find_upwards();
 
         remove_file(&file_path).expect("Could not remove temp file");
 

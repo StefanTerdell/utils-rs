@@ -7,6 +7,7 @@ pub mod as_copy;
 pub mod as_str;
 pub mod expect_comparison;
 pub mod expect_length;
+pub mod find_upwards;
 pub mod from_str;
 pub mod map;
 pub mod unwrap_into;
