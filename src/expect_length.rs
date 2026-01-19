@@ -1,4 +1,6 @@
-use crate::{comparator::Comparison, prelude::ExpectedComparisonError, with_len::WithLen};
+use crate::{
+    comparator::Comparison, expect_comparison::ExpectedComparisonError, with_len::WithLen,
+};
 use core::error::Error;
 use std::fmt::Display;
 

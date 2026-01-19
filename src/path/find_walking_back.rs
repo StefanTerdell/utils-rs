@@ -36,7 +36,7 @@ impl FindWalkingBack for Path {
                 return Ok(Some(curr_path));
             } else if let Some(parent) = curr_dir.parent() {
                 curr_dir = parent;
-                curr_path = curr_dir.join(&file_or_dir_name);
+                curr_path = curr_dir.join(file_or_dir_name);
             } else {
                 return Ok(None);
             }
