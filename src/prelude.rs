@@ -3,5 +3,5 @@
 pub use crate::{
     as_bool::*, as_clone::*, as_copy::*, as_str::*, comparator::*, dependencies::*,
     expect_comparison::*, expect_length::*, find_upwards::*, from_str::*, map::*, map_into::*,
-    try_map_into::*, unwrap_into::*, with_len::*,
+    path::*, secret::*, try_map_into::*, unwrap_into::*, with_len::*,
 };
