@@ -1,6 +1,5 @@
 use crate::comparator::Comparison;
-use core::error::Error;
-use std::fmt::{Debug, Display};
+use core::{error::Error, fmt};
 
 pub trait ExpectComparison: PartialOrd + PartialEq + Sized {
     fn expect_lt(self, other: Self) -> Result<Self, ExpectedComparisonError<Self>>;
@@ -20,10 +19,10 @@ pub struct ExpectedComparisonError<T> {
     pub actual: T,
 }
 
-impl<T: Debug> Error for ExpectedComparisonError<T> {}
+impl<T: fmt::Debug> Error for ExpectedComparisonError<T> {}
 
-impl<T: Debug> Display for ExpectedComparisonError<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl<T: fmt::Debug> fmt::Display for ExpectedComparisonError<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!(
             "Expected value to be {} {:?}, but it was {:?}",
             self.comparison, self.comparator, self.actual

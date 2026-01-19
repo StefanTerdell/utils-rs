@@ -7,6 +7,7 @@ pub mod as_copy;
 pub mod as_str;
 pub mod expect_comparison;
 pub mod expect_length;
+#[cfg(feature = "std")]
 pub mod find_upwards;
 pub mod from_str;
 pub mod map;
@@ -17,16 +18,19 @@ pub mod with_len;
 
 // Trait implementations:
 pub mod bool;
+#[cfg(feature = "std")]
 pub mod hash_map;
+#[cfg(feature = "std")]
 pub mod hash_set;
 pub mod option;
+#[cfg(feature = "std")]
+pub mod path;
 pub mod str;
 pub mod string;
 pub mod vec;
 
 // Structs:
 pub mod comparator;
-pub mod path;
 
 // Exports:
 pub mod dependencies;

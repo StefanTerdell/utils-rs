@@ -1,4 +1,5 @@
 use crate::map::Map;
+use core::fmt;
 
 impl Map for bool {
     fn ok(self) -> Result<Self, Self> {
@@ -21,7 +22,7 @@ impl Map for bool {
         self.expect("Expected 'true', got 'false'")
     }
 
-    fn expect(self, message: impl std::fmt::Display) -> Self {
+    fn expect(self, message: impl fmt::Display) -> Self {
         if self { self } else { panic!("{message}") }
     }
 }

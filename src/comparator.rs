@@ -1,4 +1,6 @@
-#[derive(std::fmt::Debug, Clone, Copy, PartialEq, Eq)]
+use core::fmt::{Debug, Display, Formatter, Result};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 #[cfg_attr(feature = "schemars", derive(::schemars::JsonSchema))]
 pub enum Comparison {
@@ -10,8 +12,8 @@ pub enum Comparison {
     Greater,
 }
 
-impl std::fmt::Display for Comparison {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for Comparison {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         f.write_str(match self {
             Comparison::Less => "less than",
             Comparison::LessOrEqual => "less than or equal to",

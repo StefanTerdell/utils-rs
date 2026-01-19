@@ -1,8 +1,7 @@
 use crate::{
     comparator::Comparison, expect_comparison::ExpectedComparisonError, with_len::WithLen,
 };
-use core::error::Error;
-use std::fmt::Display;
+use core::{error::Error, fmt};
 
 pub trait ExpectLen: WithLen + Sized {
     fn expect_len_lt(self, length: usize) -> Result<Self, ExpectedLenError>;
@@ -23,7 +22,7 @@ pub trait ExpectLen: WithLen + Sized {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(fmt::Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(::serde::Serialize, ::serde::Deserialize))]
 #[cfg_attr(feature = "schemars", derive(::schemars::JsonSchema))]
 pub struct ExpectedLenError {
@@ -50,8 +49,8 @@ impl From<ExpectedComparisonError<usize>> for ExpectedLenError {
 
 impl Error for ExpectedLenError {}
 
-impl Display for ExpectedLenError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for ExpectedLenError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!(
             "Expected length to be {} {}, but it was {}",
             self.comparison, self.comparator, self.actual

@@ -1,11 +1,11 @@
-use std::fmt::Debug;
+use core::fmt;
 
 pub trait UnwrapInto<T> {
     fn unwrap_into(self) -> T;
     fn expect_into(self, message: &str) -> T;
 }
 
-impl<T, E: Debug, S: TryInto<T, Error = E>> UnwrapInto<T> for S {
+impl<T, E: fmt::Debug, S: TryInto<T, Error = E>> UnwrapInto<T> for S {
     fn unwrap_into(self) -> T {
         self.try_into().unwrap()
     }
