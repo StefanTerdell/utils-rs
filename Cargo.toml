@@ -6,11 +6,9 @@ edition = "2024"
 [dependencies]
 schemars = { version = "1.0.4", optional = true }
 serde = { version = "1.0.219", features = ["derive"], optional = true }
-sqlx = { version = "0.8.6", default-features = false, features = ["derive"], optional = true }
 thiserror = "2.0.16"
 
 [features]
-default = ["serde", "schemars", "sqlx"]
+default = ["serde", "schemars"]
 serde = ["dep:serde"]
-schemars = ["serde", "dep:schemars"]
-sqlx = ["dep:sqlx"]
+schemars = ["dep:schemars"]

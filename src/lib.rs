@@ -24,7 +24,6 @@ pub mod vec;
 // Structs:
 pub mod comparator;
 pub mod path;
-pub mod secret;
 
 // Exports:
 pub mod dependencies;
