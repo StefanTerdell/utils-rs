@@ -16,8 +16,3 @@ pub use crate::{
     unwrap_into::*,
     with_len::*,
 };
-
-#[cfg(feature = "serde")]
-pub use crate::serde_formats::{
-    deserialize_from_file::*, error::*, format::*, serialize_to_file::*,
-};

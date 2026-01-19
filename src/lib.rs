@@ -25,8 +25,6 @@ pub mod vec;
 pub mod comparator;
 pub mod path;
 pub mod secret;
-#[cfg(feature = "serde_formats")]
-pub mod serde_formats;
 
 // Exports:
 pub mod dependencies;
