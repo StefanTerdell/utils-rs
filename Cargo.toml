@@ -2,6 +2,8 @@
 name = "stefans-utils"
 version = "0.1.0"
 edition = "2024"
+description = "A collection of useful Rust utility functions, types, and traits."
+license = "MIT"
 
 [dependencies]
 schemars = { version = "1", optional = true }
