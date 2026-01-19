@@ -10,6 +10,8 @@ pub mod expect_length;
 pub mod find_upwards;
 pub mod from_str;
 pub mod map;
+pub mod map_into;
+pub mod try_map_into;
 pub mod unwrap_into;
 pub mod with_len;
 
