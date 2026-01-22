@@ -29,6 +29,10 @@ pub mod vec;
 pub mod comparator;
 pub mod secret;
 
+// Serde-helpers
+#[cfg(feature = "serde")]
+pub mod php_safe_hashmap;
+
 // Exports:
 pub mod dependencies;
 pub mod prelude;
