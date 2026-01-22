@@ -2,16 +2,14 @@
 //!
 //! Example:
 //! ```rust
-//! use utils_rs::prefix::*;
+//! use stefans_utils::prelude::*;
 //!
 //! assert_eq!(Some(true).as_bool(), true);
 //! assert_eq!(Some(false).as_bool(), false);
 //! assert_eq!(None::<bool>.as_bool(), false);
 //! ```
 
-pub trait AsBool {
-    fn as_bool(&self) -> bool;
-}
+use crate::as_bool::AsBool;
 
 impl AsBool for Option<bool> {
     /// Returns `true` if `self` is `Some(true)`, and `false` if `self` is `None` or `Some(false)`
@@ -21,6 +19,7 @@ impl AsBool for Option<bool> {
 }
 
 impl AsBool for Option<&bool> {
+    /// Returns `true` if `self` is `Some(&true)`, and `false` if `self` is `None` or `Some(&false)`
     fn as_bool(&self) -> bool {
         self.is_some_and(|x| *x)
     }
