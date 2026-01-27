@@ -1,6 +1,7 @@
 //! A collection of useful Rust utility functions, types, and traits.
 
 // Traits:
+pub mod as_arc;
 pub mod as_bool;
 pub mod as_clone;
 pub mod as_copy;
