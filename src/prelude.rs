@@ -10,3 +10,5 @@ pub use crate::{
 pub use crate::php_safe_hashmap::*;
 #[cfg(all(feature = "serde", feature = "indexmap"))]
 pub use crate::php_safe_indexmap::*;
+#[cfg(feature = "serde")]
+pub use crate::single_kv_map::*;
