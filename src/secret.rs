@@ -158,7 +158,7 @@ mod schemars {
 
 #[cfg(feature = "sqlx")]
 mod sqlx_impls {
-    impl<DB: sqlx::Database, T: sqlx::Type<DB>> sqlx::Type<DB> for Secret<T> {
+    impl<DB: sqlx::Database, T: sqlx::Type<DB>> sqlx::Type<DB> for super::Secret<T> {
         fn type_info() -> DB::TypeInfo {
             T::type_info()
         }
