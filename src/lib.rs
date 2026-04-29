@@ -6,6 +6,7 @@ pub mod as_bool;
 pub mod as_clone;
 pub mod as_copy;
 pub mod as_str;
+pub mod collect_by_key;
 pub mod expect_comparison;
 pub mod expect_length;
 pub mod find_upwards;
@@ -35,6 +36,8 @@ pub mod secret;
 pub mod php_safe_hashmap;
 #[cfg(feature = "serde")]
 pub mod single_kv_map;
+#[cfg(all(feature = "serde", feature = "indexmap"))]
+pub mod php_safe_indexmap;
 
 // Exports:
 pub mod dependencies;
