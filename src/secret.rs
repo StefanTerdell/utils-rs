@@ -34,31 +34,59 @@
 /// 1. `Debug::fmt` only produces the name of the wrapped type, ie. `"Secret<&str>"`
 /// 2. `T::Clone` enables the `expose_clone(&self) -> T` method of `Secret<T>`
 /// 3. `T::Copy` enables the `expose_copy(&self) -> T` method of `Secret<T>`
-pub struct Secret<T>(T);
+pub struct Secret<T> {
+    value: T,
+    serialize_redacted: bool,
+}
 
 impl<T> Secret<T> {
     pub fn new(value: T) -> Self {
-        Self(value)
+        let serialize_redacted = {
+            #[cfg(feature = "secret-serialize-redacted")]
+            {
+                true
+            }
+            #[cfg(not(feature = "secret-serialize-redacted"))]
+            {
+                false
+            }
+        };
+
+        Self {
+            value,
+            serialize_redacted,
+        }
+    }
+
+    pub fn set_serialize_redacted(&mut self, serialize_redacted: bool) {
+        self.serialize_redacted = serialize_redacted;
+    }
+
+    pub fn with_serialize_redacted(self, serialize_redacted: bool) -> Self {
+        Self {
+            value: self.value,
+            serialize_redacted,
+        }
     }
 
     pub fn expose(self) -> T {
-        self.0
+        self.value
     }
 
     pub fn expose_ref(&self) -> &T {
-        &self.0
+        &self.value
     }
 }
 
 impl<T: Clone> Secret<T> {
     pub fn expose_clone(&self) -> T {
-        self.0.clone()
+        self.value.clone()
     }
 }
 
 impl<T: Copy> Secret<T> {
     pub fn expose_copy(&self) -> T {
-        self.0
+        self.value
     }
 }
 
@@ -70,7 +98,7 @@ impl<T> From<T> for Secret<T> {
 
 impl<T: Clone> Clone for Secret<T> {
     fn clone(&self) -> Self {
-        Self(self.0.clone())
+        Self::new(self.value.clone())
     }
 }
 
@@ -78,7 +106,7 @@ impl<T: Copy> Copy for Secret<T> {}
 
 impl<T: PartialEq> PartialEq for Secret<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.0.eq(&other.0)
+        self.value.eq(&other.value)
     }
 }
 
@@ -86,13 +114,13 @@ impl<T: Eq> Eq for Secret<T> {}
 
 impl<T: PartialOrd> PartialOrd for Secret<T> {
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
-        self.0.partial_cmp(&other.0)
+        self.value.partial_cmp(&other.value)
     }
 }
 
 impl<T: Ord> Ord for Secret<T> {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
-        self.0.cmp(&other.0)
+        self.value.cmp(&other.value)
     }
 }
 
@@ -104,7 +132,7 @@ impl<T> core::fmt::Debug for Secret<T> {
 
 impl<T: core::hash::Hash> core::hash::Hash for Secret<T> {
     fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
-        self.0.hash(state)
+        self.value.hash(state)
     }
 }
 
@@ -117,7 +145,11 @@ mod serde {
         where
             S: serde::Serializer,
         {
-            self.0.serialize(serializer)
+            if self.serialize_redacted {
+                format!("Secret<{}>", core::any::type_name::<T>()).serialize(serializer)
+            } else {
+                self.value.serialize(serializer)
+            }
         }
     }
 
@@ -127,7 +159,7 @@ mod serde {
         where
             D: serde::Deserializer<'de>,
         {
-            T::deserialize(deserializer).map(Secret)
+            T::deserialize(deserializer).map(Secret::new)
         }
     }
 }
@@ -151,7 +183,21 @@ mod schemars {
         }
 
         fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
-            T::json_schema(generator)
+            #[cfg(feature = "secret-serialize-redacted")]
+            {
+                schemars::json_schema!({
+                    "anyOf": [
+                        {
+                            "const": format!("Secret<{}>", core::any::type_name::<T>())
+                        },
+                        T::json_schema(generator)
+                    ]
+                })
+            }
+            #[cfg(not(feature = "secret-serialize-redacted"))]
+            {
+                T::json_schema(generator)
+            }
         }
     }
 }
@@ -178,5 +224,19 @@ mod tests {
         let secret = Secret::new("Hello, world!");
 
         assert_eq!(format!("{secret:#?}"), "Secret<&str>");
+    }
+
+    #[test]
+    fn serialize_redacted_should_output_type_only() {
+        let secret = Secret::new("Hello, world!").with_serialize_redacted(true);
+
+        assert_eq!(serde_json::to_string(&secret).unwrap(), "\"Secret<&str>\"");
+    }
+
+    #[test]
+    fn serialize_unredacted_should_output_full_value() {
+        let secret = Secret::new("Hello, world!").with_serialize_redacted(false);
+
+        assert_eq!(serde_json::to_string(&secret).unwrap(), "\"Hello, world!\"");
     }
 }
