@@ -76,6 +76,13 @@ impl<T> Secret<T> {
     pub fn expose_ref(&self) -> &T {
         &self.value
     }
+
+    pub fn expose_as_ref<R: ?Sized>(&self) -> &R
+    where
+        T: AsRef<R>,
+    {
+        self.expose_ref().as_ref()
+    }
 }
 
 impl<T: Clone> Secret<T> {
@@ -238,5 +245,20 @@ mod tests {
         let secret = Secret::new("Hello, world!").with_serialize_redacted(false);
 
         assert_eq!(serde_json::to_string(&secret).unwrap(), "\"Hello, world!\"");
+    }
+
+    #[test]
+    fn should_be_able_to_expose_as_ref() {
+        #[derive(Debug, PartialEq)]
+        struct Inner;
+        struct Outer(Inner);
+
+        impl AsRef<Inner> for Outer {
+            fn as_ref(&self) -> &Inner {
+                &self.0
+            }
+        }
+
+        assert_eq!(&Inner, Secret::new(Outer(Inner)).expose_as_ref());
     }
 }
