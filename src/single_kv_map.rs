@@ -60,7 +60,7 @@ impl<'de, Key: Deserialize<'de>, Value: Deserialize<'de>> Visitor<'de>
             && remaining != 0
         {
             Err(A::Error::unknown_field(
-                &format!("Found {remaining} entries, expecting 0"),
+                &format!("Found {remaining} remaining entries, expecting 0"),
                 &[],
             ))
         } else {
