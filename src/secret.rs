@@ -288,7 +288,7 @@ mod tests {
 
         impl AsClone<Inner> for &Outer {
             fn as_clone(self) -> Inner {
-                (&self.0).clone()
+                self.0.clone()
             }
         }
 
