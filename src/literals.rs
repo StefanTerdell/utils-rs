@@ -1,11 +1,11 @@
 #[macro_export]
 macro_rules! literal {
     ($(#[$attr:meta])* $name:ident($type:tt) = $value:literal) => {
-        literal!($(#[$attr])* $name($type => $type) = $value);
+        $crate::literal!($(#[$attr])* $name($type => $type) = $value);
     };
 
     ($(#[$attr:meta])* $name:ident($serde_from:tt => $type:tt) = $value:literal) => {
-        literal!(@ $(#[$attr])* $name($serde_from => $type) = $value);
+        $crate::literal!(@ $(#[$attr])* $name($serde_from => $type) = $value);
 
         impl $name {
             pub const VALUE: $type = $value;
@@ -19,11 +19,11 @@ macro_rules! literal {
     };
 
     ($(#[$attr:meta])* $name:ident(&$type:tt) = $value:literal) => {
-        literal!($(#[$attr])* $name($type => $type) = $value);
+        $crate::literal!($(#[$attr])* $name($type => $type) = $value);
     };
 
     ($(#[$attr:meta])* $name:ident($serde_from:tt => &$type:tt) = $value:literal) => {
-        literal!(@ $(#[$attr])* $name($serde_from => $type) = $value);
+        $crate::literal!(@ $(#[$attr])* $name($serde_from => $type) = $value);
 
         impl $name {
             pub const VALUE: &$type = $value;
