@@ -1,5 +1,7 @@
 //! Contains the `Secret<T>` struct, designed to wrap values that should never appear formatted with Display or Debug in logs or other output.
 
+use crate::prelude::{AsClone, AsCopy};
+
 /// Wraps a value that should never appear formatted with Display or Debug in logs or other output.
 ///
 /// `Secret<T>` does implement `Debug`, but only outputs the inner type name, ie. `"Secret<String>"`;
@@ -76,17 +78,38 @@ impl<T> Secret<T> {
     pub fn expose_ref(&self) -> &T {
         &self.value
     }
+
+    pub fn expose_as_ref<R: ?Sized>(&self) -> &R
+    where
+        T: AsRef<R>,
+    {
+        self.expose_ref().as_ref()
+    }
 }
 
 impl<T: Clone> Secret<T> {
     pub fn expose_clone(&self) -> T {
         self.value.clone()
     }
+
+    pub fn expose_as_clone<R>(&self) -> R
+    where
+        for<'a> &'a T: AsClone<R>,
+    {
+        (&self.value).as_clone()
+    }
 }
 
 impl<T: Copy> Secret<T> {
     pub fn expose_copy(&self) -> T {
         self.value
+    }
+
+    pub fn expose_as_copy<R>(&self) -> R
+    where
+        for<'a> &'a T: AsCopy<R>,
+    {
+        (&self.value).as_copy()
     }
 }
 
@@ -217,7 +240,8 @@ mod sqlx_impls {
 
 #[cfg(test)]
 mod tests {
-    use super::Secret;
+
+    use super::*;
 
     #[test]
     fn debug_should_output_type_only() {
@@ -238,5 +262,56 @@ mod tests {
         let secret = Secret::new("Hello, world!").with_serialize_redacted(false);
 
         assert_eq!(serde_json::to_string(&secret).unwrap(), "\"Hello, world!\"");
+    }
+
+    #[test]
+    fn should_be_able_to_expose_as_ref() {
+        #[derive(Debug, PartialEq)]
+        struct Inner;
+        struct Outer(Inner);
+
+        impl AsRef<Inner> for Outer {
+            fn as_ref(&self) -> &Inner {
+                &self.0
+            }
+        }
+
+        assert_eq!(&Inner, Secret::new(Outer(Inner)).expose_as_ref());
+    }
+
+    #[test]
+    fn should_be_able_to_expose_as_clone() {
+        #[derive(Clone, Debug, PartialEq)]
+        struct Inner;
+        #[derive(Clone)]
+        struct Outer(Inner);
+
+        impl AsClone<Inner> for &Outer {
+            fn as_clone(self) -> Inner {
+                (&self.0).clone()
+            }
+        }
+
+        let secret = Secret::new(Outer(Inner));
+
+        assert_eq!(Inner, secret.expose_as_clone());
+    }
+
+    #[test]
+    fn should_be_able_to_expose_as_copy() {
+        #[derive(Clone, Copy, Debug, PartialEq)]
+        struct Inner;
+        #[derive(Clone, Copy)]
+        struct Outer(Inner);
+
+        impl AsCopy<Inner> for &Outer {
+            fn as_copy(self) -> Inner {
+                self.0
+            }
+        }
+
+        let secret = Secret::new(Outer(Inner));
+
+        assert_eq!(Inner, secret.expose_as_copy());
     }
 }
