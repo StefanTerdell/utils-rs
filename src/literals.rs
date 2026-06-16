@@ -1,70 +1,73 @@
 #[macro_export]
 macro_rules! literal {
-($(#[$attr:meta])* $name:ident($type:ty) = $value:expr) => {
-    #[derive(
-        ::core::fmt::Debug, ::core::clone::Clone, ::serde::Serialize, ::serde::Deserialize,
-    )]
-    $(#[$attr])*
-    pub struct $name($type);
+    ($(#[$attr:meta])* $name:ident($type:ty) = $value:expr) => {
+        #[derive(::core::fmt::Debug, ::core::clone::Clone, ::serde::Serialize)]
+        $(#[$attr])*
+        pub struct $name($type);
 
-    impl<T: PartialEq<$type>> PartialEq<T> for $name {
-        fn eq(&self, other: &T) -> bool {
-            other.eq(&self.0)
-        }
-    }
+        impl<'de> ::serde::Deserialize<'de> for $name {
+            fn deserialize<D>(deserializer: D) -> ::core::result::Result<Self, D::Error>
+            where
+                D: ::serde::Deserializer<'de>,
+            {
+                let value = <$type as ::serde::Deserialize<'de>>::deserialize(deserializer)?;
 
-    impl ::schemars::JsonSchema for $name {
-        fn schema_name() -> std::borrow::Cow<'static, str> {
-            stringify!($name).into()
-        }
-
-        fn json_schema(_: &mut ::schemars::SchemaGenerator) -> ::schemars::Schema {
-            ::schemars::json_schema!({ "const": $value })
-        }
-    }
-
-    impl ::std::fmt::Display for $name {
-        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-            f.write_fmt(format_args!("{}", &self.0))
-        }
-    }
-
-    impl AsRef<$type> for $name {
-        fn as_ref(&self) -> &$type {
-            &self.0
-        }
-    }
-
-    impl TryFrom<$type> for $name {
-        type Error = String;
-
-        fn try_from(value: $type) -> ::std::result::Result<Self, Self::Error> {
-            if value == $value {
-                Ok(Self(value))
-            } else {
-                Err(format!(
-                    "Value must be exactly {}",
-                    ::serde_json::json!($value)
-                ))
+                Self::try_from(value).map_err(::serde::de::Error::custom)
             }
         }
-    }
 
-    impl From<$name> for $type {
-        fn from(value: $name) -> Self {
-            value.0
+        impl<T: PartialEq<$type>> PartialEq<T> for $name {
+            fn eq(&self, other: &T) -> bool {
+                other.eq(&self.0)
+            }
         }
-    }
-};
+
+        impl ::schemars::JsonSchema for $name {
+            fn schema_name() -> ::std::borrow::Cow<'static, str> {
+                stringify!($name).into()
+            }
+
+            fn json_schema(_: &mut ::schemars::SchemaGenerator) -> ::schemars::Schema {
+                ::schemars::json_schema!({ "const": $value })
+            }
+        }
+
+        impl ::std::fmt::Display for $name {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                f.write_fmt(format_args!("{}", &self.0))
+            }
+        }
+
+        impl AsRef<$type> for $name {
+            fn as_ref(&self) -> &$type {
+                &self.0
+            }
+        }
+
+        impl TryFrom<$type> for $name {
+            type Error = String;
+
+            fn try_from(value: $type) -> ::std::result::Result<Self, Self::Error> {
+                if value == $value {
+                    Ok(Self(value))
+                } else {
+                    Err(format!("Value must be exactly {:?}", $value))
+                }
+            }
+        }
+
+        impl From<$name> for $type {
+            fn from(value: $name) -> Self {
+                value.0
+            }
+        }
+    };
 }
 
 #[macro_export]
 macro_rules! literal_string {
     ($name:ident = $value:expr) => {
-        $crate::literal!(
-            #[serde(try_from = "String")]
-            $name(String) = $value
-        );
+        $crate::literal!($name(String) = $value);
 
         impl Default for $name {
             fn default() -> Self {
@@ -74,69 +77,28 @@ macro_rules! literal_string {
     };
 }
 
-#[macro_export]
-macro_rules! literal_u32 {
-    ($name:ident = $value:expr) => {
-        $crate::literal!(
-            #[serde(try_from = "u32")]
-            $name(u32) = $value
-        );
+macro_rules! literal_scalars {
+    ($d:tt $($type:ident)*) => {
+        $(
+            ::paste::paste! {
+                #[macro_export]
+                macro_rules! [<literal_ $type>] {
+                    ($d name:ident = $d value:expr) => {
+                        $crate::literal!($d name($type) = $d value);
 
-        impl Default for $name {
-            fn default() -> Self {
-                Self($value)
+                        impl Default for $d name {
+                            fn default() -> Self {
+                                Self($d value)
+                            }
+                        }
+                    };
+                }
             }
-        }
+        )*
     };
 }
 
-#[macro_export]
-macro_rules! literal_i32 {
-    ($name:ident = $value:expr) => {
-        $crate::literal!(
-            #[serde(try_from = "i32")]
-            $name(i32) = $value
-        );
-
-        impl Default for $name {
-            fn default() -> Self {
-                Self($value)
-            }
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! literal_f32 {
-    ($name:ident = $value:expr) => {
-        $crate::literal!(
-            #[serde(try_from = "f32")]
-            $name(f32) = $value
-        );
-
-        impl Default for $name {
-            fn default() -> Self {
-                Self($value)
-            }
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! literal_bool {
-    ($name:ident = $value:expr) => {
-        $crate::literal!(
-            #[serde(try_from = "bool")]
-            $name(bool) = $value
-        );
-
-        impl Default for $name {
-            fn default() -> Self {
-                Self($value)
-            }
-        }
-    };
-}
+literal_scalars!($ u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize f32 f64 bool);
 
 #[cfg(test)]
 mod tests {
