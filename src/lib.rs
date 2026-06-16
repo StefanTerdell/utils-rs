@@ -32,12 +32,14 @@ pub mod comparator;
 pub mod secret;
 
 // Serde-helpers
+#[cfg(all(feature = "serde", feature = "schemars"))]
+pub mod literals;
 #[cfg(feature = "serde")]
 pub mod php_safe_hashmap;
-#[cfg(feature = "serde")]
-pub mod single_kv_map;
 #[cfg(all(feature = "serde", feature = "indexmap"))]
 pub mod php_safe_indexmap;
+#[cfg(feature = "serde")]
+pub mod single_kv_map;
 
 // Exports:
 pub mod dependencies;
