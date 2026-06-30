@@ -83,7 +83,19 @@ impl<T> Secret<T> {
     where
         T: AsRef<R>,
     {
-        self.expose_ref().as_ref()
+        self.value.as_ref()
+    }
+}
+
+impl<T: AsRef<str>> Secret<T> {
+    pub fn expose_as_str(&self) -> &str {
+        self.value.as_ref()
+    }
+}
+
+impl<T: ToString> Secret<T> {
+    pub fn expose_to_string(&self) -> String {
+        self.value.to_string()
     }
 }
 
@@ -313,5 +325,23 @@ mod tests {
         let secret = Secret::new(Outer(Inner));
 
         assert_eq!(Inner, secret.expose_as_copy());
+    }
+
+    #[test]
+    fn should_be_able_to_expose_to_string_for_anything_implementing_to_string() {
+        struct X;
+
+        impl std::fmt::Display for X {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.write_str("check")
+            }
+        }
+
+        assert_eq!(Secret::new(X).expose_to_string(), "check");
+    }
+
+    #[test]
+    fn should_be_able_to_expose_as_str_for_anything_implementing_as_ref_str() {
+        assert_eq!(Secret::new(String::from("check")).expose_as_str(), "check")
     }
 }
