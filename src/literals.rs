@@ -115,6 +115,29 @@ macro_rules! literal_str {
     };
 }
 
+#[macro_export]
+macro_rules! literal_bool {
+    ($(#[$attr:meta])* $name:ident = true) => {
+        $crate::literal!($(#[$attr])* $name(bool) = true);
+        impl ::std::ops::Not for $name {
+            type Output = bool;
+            fn not(self) -> bool {
+                false
+            }
+        }
+    };
+
+    ($(#[$attr:meta])* $name:ident = false) => {
+        $crate::literal!($(#[$attr])* $name(bool) = false);
+        impl ::std::ops::Not for $name {
+            type Output = bool;
+            fn not(self) -> bool {
+                true
+            }
+        }
+    };
+}
+
 macro_rules! literal_scalars {
     ($d:tt $($type:ident)*) => {
         $(
@@ -130,10 +153,33 @@ macro_rules! literal_scalars {
     }
 }
 
-literal_scalars!($ u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize f32 f64 bool);
+literal_scalars!($ u8 u16 u32 u64 u128 usize i8 i16 i32 i64 i128 isize f32 f64);
+
+// export actual types because what the hell
+literal_bool!(True = true);
+literal_bool!(False = false);
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn literal_bool_should_work() {
+        use super::{False, True};
+
+        assert_eq!(True, True);
+        assert_ne!(True, False);
+        assert_ne!(False, True);
+        assert_eq!(False, False);
+
+        assert_eq!(True, true);
+        assert_ne!(True, false);
+        assert_ne!(False, true);
+        assert_eq!(False, false);
+
+        assert!(True);
+        assert!(!False);
+    }
+
     #[test]
     fn literal_str_should_work() {
         literal_str!(
