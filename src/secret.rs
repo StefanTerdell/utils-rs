@@ -44,11 +44,11 @@ pub struct Secret<T> {
 impl<T> Secret<T> {
     pub fn new(value: T) -> Self {
         let serialize_redacted = {
-            #[cfg(feature = "secret-serialize-redacted")]
+            #[cfg(not(feature = "secret-serialize-unredacted"))]
             {
                 true
             }
-            #[cfg(not(feature = "secret-serialize-redacted"))]
+            #[cfg(feature = "secret-serialize-unredacted")]
             {
                 false
             }
@@ -218,7 +218,7 @@ mod schemars {
         }
 
         fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
-            #[cfg(feature = "secret-serialize-redacted")]
+            #[cfg(not(feature = "secret-serialize-unredacted"))]
             {
                 schemars::json_schema!({
                     "anyOf": [
@@ -229,7 +229,7 @@ mod schemars {
                     ]
                 })
             }
-            #[cfg(not(feature = "secret-serialize-redacted"))]
+            #[cfg(feature = "secret-serialize-unredacted")]
             {
                 T::json_schema(generator)
             }

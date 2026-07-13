@@ -19,7 +19,7 @@ serde = ["dep:serde", "indexmap?/serde"]
 schemars = ["dep:schemars"]
 indexmap = ["dep:indexmap", "schemars?/indexmap2"]
 sqlx = ["dep:sqlx"]
-secret-serialize-redacted = []
+secret-serialize-unredacted = []
 
 [dev-dependencies]
 pretty_assertions = "1.4.1"
