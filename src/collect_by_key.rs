@@ -18,6 +18,7 @@ macro_rules! impl_for {
                                 Some(list) => {
                                     list.$add_to_list_method(curr);
                                 }
+                                #[allow(clippy::vec_init_then_push)]
                                 None => {
                                     let mut list = $list_type::default();
                                     list.$add_to_list_method(curr);
