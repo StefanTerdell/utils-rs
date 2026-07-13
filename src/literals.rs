@@ -163,6 +163,7 @@ literal_bool!(False = false);
 mod tests {
 
     #[test]
+    #[allow(clippy::bool_assert_comparison)]
     fn literal_bool_should_work() {
         use super::{False, True};
 
