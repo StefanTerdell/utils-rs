@@ -5,6 +5,7 @@ pub mod as_arc;
 pub mod as_bool;
 pub mod as_clone;
 pub mod as_copy;
+pub mod as_secret;
 pub mod as_str;
 pub mod collect_by_key;
 pub mod expect_comparison;
