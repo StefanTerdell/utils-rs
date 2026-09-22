@@ -162,7 +162,21 @@ impl<Key: JsonSchema, Value: JsonSchema> JsonSchema for SingleKVMap<Key, Value> 
         let mut key_schema = generator.subschema_for::<Key>();
         let value_schema = generator.subschema_for::<Value>();
 
-        key_schema.as_object_mut().map(|x| x.remove("type"));
+        if let Some(key_object_schema) = key_schema.as_object_mut() {
+            key_object_schema.remove("type");
+
+            dbg!(&key_object_schema);
+
+            if let Some(key_const_value) = key_object_schema.get("const")
+                && let Some(key_const_str) = key_const_value.as_str()
+            {
+                return json_schema!({
+                    "type": "object",
+                    "properties": { key_const_str: value_schema },
+                    "additionalProperties": false
+                });
+            }
+        }
 
         json_schema!({
             "type": "object",
@@ -181,6 +195,7 @@ mod tests {
     use schemars::schema_for;
     use serde_json::json;
 
+    #[cfg(feature = "schemars")]
     use super::*;
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -228,6 +243,33 @@ mod tests {
                 },
                 "minProperties": 1,
                 "maxProperties": 1,
+                "$defs": {
+                    "MyEnum": {
+                        "type": "string",
+                        "enum": ["A", "B"]
+                    }
+                }
+            })
+        )
+    }
+
+    #[cfg(all(feature = "schemars", feature = "serde"))]
+    #[test]
+    fn derive_json_schema_with_lit_str_key() {
+        crate::literal_str!(MyKey = "my-key");
+
+        assert_eq!(
+            schema_for!(SingleKVMap<MyKey, MyEnum>),
+            json_schema!({
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "title": "MyKeyMyEnumSingleKVMap",
+                "type": "object",
+                "properties": {
+                    "my-key": {
+                        "$ref": "#/$defs/MyEnum"
+                    }
+                },
+                "additionalProperties": false,
                 "$defs": {
                     "MyEnum": {
                         "type": "string",
