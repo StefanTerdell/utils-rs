@@ -165,8 +165,6 @@ impl<Key: JsonSchema, Value: JsonSchema> JsonSchema for SingleKVMap<Key, Value> 
         if let Some(key_object_schema) = key_schema.as_object_mut() {
             key_object_schema.remove("type");
 
-            dbg!(&key_object_schema);
-
             if let Some(key_const_value) = key_object_schema.get("const")
                 && let Some(key_const_str) = key_const_value.as_str()
             {
