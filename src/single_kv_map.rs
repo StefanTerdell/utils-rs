@@ -183,13 +183,24 @@ impl<Key: JsonSchema, Value: JsonSchema> JsonSchema for SingleKVMap<Key, Value> 
         if let Some(key_object_schema) = key_schema.as_object_mut() {
             key_object_schema.remove("type");
 
-            dbg!(&key_object_schema);
-
-            if let Some(key_const_value) = key_object_schema.get("const")
+            let key_const_str_opt = if let Some(key_const_value) = key_object_schema.get("const")
                 && let Some(key_const_str) = key_const_value.as_str()
             {
+                Some(key_const_str)
+            } else if let Some(key_enum_value) = key_object_schema.get("enum")
+                && let Some(key_enum_array) = key_enum_value.as_array()
+                && key_enum_array.len() == 1
+                && let Some(key_const_str) = key_enum_array[0].as_str()
+            {
+                Some(key_const_str)
+            } else {
+                None
+            };
+
+            if let Some(key_const_str) = key_const_str_opt {
                 return json_schema!({
                     "type": "object",
+                    "required": [key_const_str],
                     "properties": { key_const_str: value_schema },
                     "additionalProperties": false
                 });
@@ -282,6 +293,7 @@ mod tests {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "title": "MyKeyMyEnumSingleKVMap",
                 "type": "object",
+                "required": ["my-key"],
                 "properties": {
                     "my-key": {
                         "$ref": "#/$defs/MyEnum"
