@@ -102,6 +102,10 @@ macro_rules! literal {
                     "const": $name::VALUE
                 })
             }
+
+            fn inline_schema() -> bool {
+                true
+            }
         }
 
         impl Eq for $name {}
