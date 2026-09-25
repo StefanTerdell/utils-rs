@@ -54,15 +54,33 @@ impl<'de, Key: Deserialize<'de>, Value: Deserialize<'de>> Visitor<'de>
     {
         let (key, value) = map
             .next_entry()?
-            .ok_or(A::Error::missing_field("missing first (and only) entry"))?;
+            .ok_or(A::Error::custom("Found 0 entries, expecting 1"))?;
 
         if let Some(remaining) = map.size_hint()
             && remaining != 0
         {
-            Err(A::Error::unknown_field(
-                &format!("Found {remaining} remaining entries, expecting 0"),
-                &[],
-            ))
+            Err(A::Error::custom(format!(
+                "Found {remaining} remaining entries, expecting 0"
+            )))
+        } else {
+            Ok(SingleKVMap::new(key, value))
+        }
+    }
+
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::SeqAccess<'de>,
+    {
+        let (key, value) = seq
+            .next_element::<(Key, Value)>()?
+            .ok_or(A::Error::custom("Found 0 entries, expecting 1"))?;
+
+        if let Some(remaining) = seq.size_hint()
+            && remaining != 0
+        {
+            Err(A::Error::custom(format!(
+                "Found {remaining} remaining entries, expecting 0"
+            )))
         } else {
             Ok(SingleKVMap::new(key, value))
         }
@@ -73,7 +91,7 @@ impl<'de, Key: Deserialize<'de>, Value: Deserialize<'de>> Deserialize<'de>
     for SingleKVMap<Key, Value>
 {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        deserializer.deserialize_map(SingleKVMapVisitor::default())
+        deserializer.deserialize_any(SingleKVMapVisitor::default())
     }
 }
 
@@ -266,6 +284,14 @@ mod tests {
             }))
             .unwrap(),
             SingleKVMap::new(10, "hello"),
+        )
+    }
+
+    #[test]
+    fn derive_deserialize_php_safe() {
+        assert_eq!(
+            serde_json::from_value::<SingleKVMap<String, String>>(json!([["foo", "bar"]])).unwrap(),
+            SingleKVMap::new("foo", "bar"),
         )
     }
 
